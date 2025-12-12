@@ -1,9 +1,9 @@
-import os
-import urllib.request as request
-from zipfile import ZipFile
 import tensorflow as tf
 from pathlib import Path
 from cnnClassifier.entity.config_entity import PrepareBaseModelConfig
+
+# Ensure TensorFlow eager execution is enabled
+tf.config.run_functions_eagerly(True)
                                                 
 
 
@@ -56,7 +56,7 @@ class PrepareBaseModel:
         # Adam optimizer works better with EfficientNet than SGD
         full_model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
-            loss=tf.keras.losses.CategoricalCrossentropy(),
+            loss=tf.keras.losses.SparseCategoricalCrossentropy(),
             metrics=["accuracy"]
         )
 

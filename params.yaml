@@ -2,7 +2,7 @@ AUGMENTATION: True
 IMAGE_SIZE: [224, 224, 3] # EfficientNetB0 uses 224x224
 BATCH_SIZE: 8  # Reduced from 16 for 8GB RAM safety
 INCLUDE_TOP: False
-EPOCHS: 10  # 10 epochs = ~50-70 minutes on CPU for 450 images
+EPOCHS: 1 # 10 epochs for proper model training
 CLASSES: 2  # Binary classification: Normal vs Adenocarcinoma
 WEIGHTS: imagenet
 LEARNING_RATE: 0.001  # Lower learning rate for Adam optimizer
