@@ -89,11 +89,6 @@ An **end-to-end deep learning project** for detecting **Adenocarcinoma cancer** 
 │   └── training/                  # Trained models & logs
 ├── config/
 │   └── config.yaml                # Central configuration
-├── research/                      # Jupyter notebooks
-│   ├── 01_data_ingestion.ipynb
-│   ├── 02_prepare_base_model.ipynb
-│   ├── 03_model_trainer.ipynb
-│   └── 04_model_evaluation_mlflow.ipynb
 ├── src/cnnClassifier/
 │   ├── components/                # Core ML components
 │   ├── pipeline/                  # Training & inference pipelines
