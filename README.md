@@ -1,6 +1,7 @@
 
-<div align="center">
 # 🫁 Chest Cancer Classification using Deep Learning
+
+<div align="center">
 
 [![Python](https://img.shields.io/badge/Python-3.10-blue.svg)](https://www.python.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/)
@@ -10,13 +11,10 @@
 [![MLflow](https://img.shields.io/badge/MLflow-Tracking-blue.svg)](https://mlflow.org/)
 
 </div>
----
 
 ## 📋 Overview
 
 An end-to-end deep learning solution for detecting **Adenocarcinoma** cancer from chest CT scan images. Built with production-grade MLOps practices, this project demonstrates complete ML pipeline implementation from data ingestion to deployment with automated CI/CD workflows.
-
----
 
 ## ✨ Key Features
 
@@ -37,8 +35,6 @@ An end-to-end deep learning solution for detecting **Adenocarcinoma** cancer fro
 - **Docker containerization** with optimized image size
 - **AWS ECS deployment** ready with automated workflows
 - **Environment-based configuration** for secure credential management
-
----
 
 ## 🛠️ Tech Stack
 
@@ -72,9 +68,7 @@ An end-to-end deep learning solution for detecting **Adenocarcinoma** cancer fro
 - **PyYAML** - Configuration file parsing
 - **Python-box** - Dict to object conversion
 
----
-
-## 📁 Project Structure
+---📁 Project Structure
 
 ```
 ├── .github/
@@ -125,4 +119,81 @@ An end-to-end deep learning solution for detecting **Adenocarcinoma** cancer fro
 
 <div align="center">
 **⭐ Star this repo if you find it useful**
-</div>
+## 🚀 Getting Started
+
+### Prerequisites
+- Python 3.10+
+- Docker (optional)
+- AWS CLI (for deployment)
+
+### Local Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd Chest-Cancer-Classification
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate 
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
+
+5. **Run the application**
+   ```bash
+   python app.py
+   ```
+   Access at: `http://localhost:8000`
+
+### Docker Deployment
+
+```bash
+# Build image
+docker build -t chest-cancer-classifier .
+
+# Run container
+docker run -p 8000:8000 --env-file .env chest-cancer-classifier
+```
+
+## 📊 Model Training Pipeline
+
+```bash
+# Run complete training pipeline
+python main.py
+
+# Or run individual stages with DVC
+dvc repro
+```
+
+## 🔗 API Endpoints
+
+- `GET /` - Web interface
+- `POST /predict` - Image classification endpoint
+- `GET /health` - Health check
+
+## 📈 Results
+
+- **Model**: EfficientNetB0 (Transfer Learning)
+- **Input Size**: 224x224x3
+- **Classes**: Adenocarcinoma Cancer, Normal
+- **Metrics**: Accuracy, Precision, Recall, AUC
+
+---
+
+<div align="center">
+
+**⭐ Star this repo if you find it useful!**
+
+Made with ❤️ by [Harsh Pratap Singh](https://github.com/CodeBy-HP)
