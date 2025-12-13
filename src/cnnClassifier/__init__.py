@@ -1,6 +1,13 @@
 import os
 import sys
 import logging
+import warnings
+
+# Suppress third-party warnings
+warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', category=FutureWarning)
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Suppress TensorFlow warnings
 
 logging_str = "[%(asctime)s: %(levelname)s: %(module)s: %(message)s]"
 

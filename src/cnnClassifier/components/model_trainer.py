@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Tuple
 from datetime import datetime
 from sklearn.utils import class_weight
+import shutil
+import os
 from cnnClassifier.entity.config_entity import TrainingConfig
 
 
@@ -29,8 +31,19 @@ class Training:
             self.logger.info(f"Loading model from: {model_path}")
             self.model = tf.keras.models.load_model(model_path)
             
-            self.logger.info("Model loaded successfully")
-            self.logger.info(f"Total parameters: {self.model.count_params():,}")
+            # Recompile with proper metrics to fix validation accuracy issue
+            self.model.compile(
+                optimizer=self.model.optimizer,
+                loss=self.model.loss,
+                metrics=[
+                    tf.keras.metrics.CategoricalAccuracy(name='accuracy'),
+                    tf.keras.metrics.AUC(name='auc'),
+                    tf.keras.metrics.Precision(name='precision'),
+                    tf.keras.metrics.Recall(name='recall')
+                ]
+            )
+            
+            self.logger.info("Model loaded and recompiled successfully")
             
             return self.model
             
@@ -39,27 +52,17 @@ class Training:
             raise
 
     def train_valid_generator(self) -> Tuple[tf.data.Dataset, tf.data.Dataset]:
-        """Create training and validation datasets using tf.data API"""
+        """Create training and validation datasets using tf.data API with proper train/val split"""
         try:
             image_size = tuple(self.config.params_image_size[:-1])
             batch_size = self.config.params_batch_size
             
-            self.logger.info(f"Loading dataset from: {self.config.training_data}")
-            self.logger.info(f"Image size: {image_size}, Batch size: {batch_size}")
+            self.logger.info(f"Loading train data from: {self.config.train_data}")
+            self.logger.info(f"Training setup — image: {image_size}, batch: {batch_size}")
             
-            self.valid_generator = tf.keras.utils.image_dataset_from_directory(
-                directory=str(self.config.training_data),
-                validation_split=0.20,
-                subset="validation",
-                seed=123,
-                image_size=image_size,
-                batch_size=batch_size,
-                shuffle=False,
-                label_mode='categorical'
-            )
-            
+            # Load training set and split for validation (from train folder only)
             self.train_generator = tf.keras.utils.image_dataset_from_directory(
-                directory=str(self.config.training_data),
+                directory=str(self.config.train_data),
                 validation_split=0.20,
                 subset="training",
                 seed=123,
@@ -69,8 +72,19 @@ class Training:
                 label_mode='categorical'
             )
             
+            self.valid_generator = tf.keras.utils.image_dataset_from_directory(
+                directory=str(self.config.train_data),
+                validation_split=0.20,
+                subset="validation",
+                seed=123,
+                image_size=image_size,
+                batch_size=batch_size,
+                shuffle=False,
+                label_mode='categorical'
+            )
+            
             class_names = self.train_generator.class_names
-            self.logger.info(f"Classes detected: {class_names}")
+            self.logger.debug(f"Classes detected: {class_names}")
             
             normalization_layer = tf.keras.layers.Rescaling(1./255)
             self.train_generator = self.train_generator.map(
@@ -83,7 +97,7 @@ class Training:
             )
             
             if self.config.params_is_augmentation:
-                self.logger.info("Data augmentation enabled")
+                self.logger.debug("Data augmentation enabled")
                 
                 data_augmentation = tf.keras.Sequential([
                     tf.keras.layers.RandomFlip("horizontal_and_vertical"),
@@ -105,8 +119,8 @@ class Training:
             train_batches = tf.data.experimental.cardinality(self.train_generator).numpy()
             valid_batches = tf.data.experimental.cardinality(self.valid_generator).numpy()
             
-            self.logger.info(f"Training batches: {train_batches}")
-            self.logger.info(f"Validation batches: {valid_batches}")
+            self.logger.debug(f"Training batches: {train_batches}")
+            self.logger.debug(f"Validation batches: {valid_batches}")
             
             return self.train_generator, self.valid_generator
             
@@ -122,10 +136,20 @@ class Training:
                 path = Path(str(path).replace('.h5', '.keras'))
             
             path.parent.mkdir(parents=True, exist_ok=True)
-            model.save(path, save_format='keras')
+            model.save(path)  # Removed save_format to suppress warning
             
             file_size = path.stat().st_size / (1024 * 1024)
             logging.info(f"Model saved: {path} ({file_size:.2f} MB)")
+
+            # Also copy to root-level deploy directory: model/model.keras
+            try:
+                root_model_dir = Path("model")
+                root_model_dir.mkdir(parents=True, exist_ok=True)
+                destination = root_model_dir / "model.keras"
+                shutil.copy2(path, destination)
+                logging.info(f"Deploy copy saved: {destination} ({file_size:.2f} MB)")
+            except Exception as copy_err:
+                logging.warning(f"Could not copy model to deploy directory: {copy_err}")
             
         except Exception as e:
             logging.error(f"Failed to save model: {e}")
@@ -212,7 +236,7 @@ class Training:
         )
         callbacks.append(tensorboard)
         
-        self.logger.info(f"Configured {len(callbacks)} callbacks")
+        self.logger.debug(f"Configured {len(callbacks)} callbacks")
         self.logger.info(f"TensorBoard logs: {log_dir}")
         
         return callbacks

@@ -26,7 +26,7 @@ class PrepareBaseModel:
             )
             
             self.logger.info(f"Base model loaded: {self.model.name}")
-            self.logger.info(f"Total parameters: {self.model.count_params():,}")
+            self.logger.info("Base model loaded")
             
             self.save_model(path=self.config.base_model_path, model=self.model)
             
@@ -49,13 +49,13 @@ class PrepareBaseModel:
         if freeze_all:
             for layer in model.layers:
                 layer.trainable = False
-            logging.info("All base model layers frozen")
+            logging.info("Base model frozen")
         elif freeze_till is not None and freeze_till > 0:
             for layer in model.layers[:-freeze_till]:
                 layer.trainable = False
-            logging.info(f"Frozen {len(model.layers) - freeze_till} layers, training last {freeze_till}")
+            logging.info(f"Training last {freeze_till} layers")
         else:
-            logging.info("All layers trainable (fine-tuning mode)")
+            logging.info("All layers trainable")
         
         x = tf.keras.layers.GlobalAveragePooling2D(name='global_avg_pool')(model.output)
         x = tf.keras.layers.BatchNormalization(name='bn_head')(x)
@@ -87,7 +87,7 @@ class PrepareBaseModel:
             optimizer=optimizer,
             loss=loss,
             metrics=[
-                'accuracy',
+                tf.keras.metrics.CategoricalAccuracy(name='accuracy'),
                 tf.keras.metrics.AUC(name='auc'),
                 tf.keras.metrics.Precision(name='precision'),
                 tf.keras.metrics.Recall(name='recall')
@@ -99,9 +99,7 @@ class PrepareBaseModel:
         trainable_params = sum([tf.size(w).numpy() for w in full_model.trainable_weights])
         non_trainable_params = sum([tf.size(w).numpy() for w in full_model.non_trainable_weights])
         
-        logging.info(f"Total parameters: {trainable_params + non_trainable_params:,}")
-        logging.info(f"Trainable parameters: {trainable_params:,}")
-        logging.info(f"Non-trainable parameters: {non_trainable_params:,}")
+        logging.info(f"Params — trainable: {trainable_params:,}, frozen: {non_trainable_params:,}")
         
         return full_model
 
@@ -140,7 +138,7 @@ class PrepareBaseModel:
                 logging.warning(f"Changed extension to .keras: {path}")
             
             path.parent.mkdir(parents=True, exist_ok=True)
-            model.save(path, save_format='keras')
+            model.save(path)  # Removed save_format to suppress warning
             
             file_size = path.stat().st_size / (1024 * 1024)
             logging.info(f"Model saved: {path} ({file_size:.2f} MB)")

@@ -1,0 +1,73 @@
+stages:
+  data_ingestion:
+    cmd: python -m cnnClassifier.pipeline.stage_01_data_ingestion
+    deps:
+      - config/config.yaml
+      - src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+      - src/cnnClassifier/components/data_ingestion.py
+    params:
+      - AUGMENTATION
+      - IMAGE_SIZE
+      - BATCH_SIZE
+      - INCLUDE_TOP
+      - EPOCHS
+      - CLASSES
+      - WEIGHTS
+      - LEARNING_RATE
+    outs:
+      - artifacts/data_ingestion/train
+      - artifacts/data_ingestion/test
+
+  prepare_base_model:
+    cmd: python -m cnnClassifier.pipeline.stage_02_prepare_base_model
+    deps:
+      - config/config.yaml
+      - params.yaml
+      - src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
+      - src/cnnClassifier/components/prepare_base_model.py
+    params:
+      - IMAGE_SIZE
+      - INCLUDE_TOP
+      - WEIGHTS
+      - CLASSES
+      - LEARNING_RATE
+    outs:
+      - artifacts/prepare_base_model/base_model.keras
+      - artifacts/prepare_base_model/base_model_updated.keras
+
+  training:
+    cmd: python -m cnnClassifier.pipeline.stage_03_model_trainer
+    deps:
+      - config/config.yaml
+      - params.yaml
+      - artifacts/prepare_base_model/base_model_updated.keras
+      - artifacts/data_ingestion/train
+      - src/cnnClassifier/pipeline/stage_03_model_trainer.py
+      - src/cnnClassifier/components/model_trainer.py
+    params:
+      - IMAGE_SIZE
+      - BATCH_SIZE
+      - EPOCHS
+      - LEARNING_RATE
+      - AUGMENTATION
+    outs:
+      - artifacts/training/model.keras
+      - artifacts/training/best_model_checkpoint.keras
+      - artifacts/training/logs:
+          cache: false
+
+  evaluation:
+    cmd: python -m cnnClassifier.pipeline.stage_04_model_evaluation
+    deps:
+      - config/config.yaml
+      - params.yaml
+      - artifacts/training/model.keras
+      - artifacts/data_ingestion/test
+      - src/cnnClassifier/pipeline/stage_04_model_evaluation.py
+      - src/cnnClassifier/components/model_evaluation_mlflow.py
+    params:
+      - IMAGE_SIZE
+      - BATCH_SIZE
+    metrics:
+      - scores.json:
+          cache: false

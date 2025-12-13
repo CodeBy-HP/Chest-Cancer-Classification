@@ -25,7 +25,7 @@ class ConfigurationManager:
             self.params = read_yaml(params_filepath)
             
             create_directories([self.config.artifacts_root])
-            logging.info("Configuration loaded successfully")
+            logging.debug("Configuration loaded successfully")
             
         except Exception as e:
             logging.error(f"Failed to load configuration: {e}")
@@ -46,7 +46,7 @@ class ConfigurationManager:
             unzip_dir=Path(config.unzip_dir)
         )
         
-        logging.info("Data ingestion config created")
+        logging.debug("Data ingestion config created")
         return data_ingestion_config
 
     def get_prepare_base_model_config(self) -> PrepareBaseModelConfig:
@@ -66,7 +66,7 @@ class ConfigurationManager:
             params_classes=self.params.CLASSES
         )
         
-        logging.info("Base model config created")
+        logging.debug("Base model config created")
         return prepare_base_model_config
 
     def get_training_config(self) -> TrainingConfig:
@@ -76,6 +76,8 @@ class ConfigurationManager:
         params = self.params
         
         training_data = Path(self.config.data_ingestion.unzip_dir) / "Chest-CT-Scan-data"
+        train_data = Path(training.train_data)
+        test_data = Path(training.test_data)
         
         create_directories([Path(training.root_dir)])
         
@@ -84,6 +86,8 @@ class ConfigurationManager:
             trained_model_path=Path(training.trained_model_path),
             updated_base_model_path=Path(prepare_base_model.updated_base_model_path),
             training_data=training_data,
+            train_data=train_data,
+            test_data=test_data,
             params_epochs=params.EPOCHS,
             params_batch_size=params.BATCH_SIZE,
             params_is_augmentation=params.AUGMENTATION,
@@ -91,7 +95,7 @@ class ConfigurationManager:
             params_learning_rate=params.LEARNING_RATE
         )
         
-        logging.info("Training config created")
+        logging.debug("Training config created")
         return training_config
 
     def get_evaluation_config(self) -> EvaluationConfig:
@@ -106,13 +110,14 @@ class ConfigurationManager:
         eval_config = EvaluationConfig(
             path_of_model=Path("artifacts/training/model.keras"),
             training_data=Path("artifacts/data_ingestion/Chest-CT-Scan-data"),
+            test_data=Path("artifacts/data_ingestion/test"),
             mlflow_uri=mlflow_uri,
             all_params=self.params,
             params_image_size=self.params.IMAGE_SIZE,
             params_batch_size=self.params.BATCH_SIZE
         )
         
-        logging.info("Evaluation config created")
+        logging.debug("Evaluation config created")
         logging.info(f"MLflow URI: {mlflow_uri}")
         
         return eval_config

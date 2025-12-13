@@ -24,10 +24,10 @@ class ModelTrainingPipeline:
 
 if __name__ == '__main__':
     try:
-        logging.info(f">>>>>> {STAGE_NAME} started <<<<<<")
+        logging.info(f"Starting: {STAGE_NAME}")
         obj = ModelTrainingPipeline()
         obj.main()
-        logging.info(f">>>>>> {STAGE_NAME} completed <<<<<<\n")
+        logging.info(f"Completed: {STAGE_NAME}")
     except Exception as e:
         logging.exception(e)
         raise e

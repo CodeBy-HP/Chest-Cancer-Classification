@@ -1,9 +1,16 @@
 import os
+import warnings
 import tensorflow as tf
 import logging
 from pathlib import Path
 from typing import Dict
 from urllib.parse import urlparse
+
+# Suppress MLflow warnings
+warnings.filterwarnings('ignore', category=DeprecationWarning, module='mlflow')
+warnings.filterwarnings('ignore', message='.*artifact_path.*')
+warnings.filterwarnings('ignore', message='.*model signature.*')
+
 import mlflow
 import mlflow.keras
 import dagshub
@@ -22,17 +29,16 @@ class Evaluation:
         self.score = None
 
     def _valid_generator(self) -> tf.data.Dataset:
-        """Create validation dataset using tf.data API"""
+        """Create test dataset using tf.data API - NO SPLIT, uses separate test folder"""
         try:
             image_size = tuple(self.config.params_image_size[:-1])
             batch_size = self.config.params_batch_size
             
-            self.logger.info(f"Loading validation data from: {self.config.training_data}")
+            self.logger.info(f"Loading test data from: {self.config.test_data}")
             
+            # Load test set WITHOUT any split (uses entire test folder)
             self.valid_generator = tf.keras.utils.image_dataset_from_directory(
-                directory=str(self.config.training_data),
-                validation_split=0.30,
-                subset="validation",
+                directory=str(self.config.test_data),
                 seed=123,
                 image_size=image_size,
                 batch_size=batch_size,
@@ -41,7 +47,7 @@ class Evaluation:
             )
             
             class_names = self.valid_generator.class_names
-            self.logger.info(f"Classes detected: {class_names}")
+            self.logger.debug(f"Classes detected: {class_names}")
             
             normalization_layer = tf.keras.layers.Rescaling(1./255)
             self.valid_generator = self.valid_generator.map(
@@ -53,7 +59,7 @@ class Evaluation:
                 buffer_size=tf.data.AUTOTUNE
             )
             
-            self.logger.info("Validation data loaded and preprocessed")
+            self.logger.debug("Validation data loaded and preprocessed")
             
             return self.valid_generator
             
@@ -70,6 +76,32 @@ class Evaluation:
             
             model = tf.keras.models.load_model(path)
             logging.info(f"Model loaded from: {path}")
+
+            # Ensure consistent metric names across training and evaluation
+            # Matches Training.get_base_model() metrics setup
+            try:
+                model.compile(
+                    optimizer=model.optimizer,
+                    loss=model.loss,
+                    metrics=[
+                        tf.keras.metrics.CategoricalAccuracy(name='accuracy'),
+                        tf.keras.metrics.AUC(name='auc'),
+                        tf.keras.metrics.Precision(name='precision'),
+                        tf.keras.metrics.Recall(name='recall')
+                    ]
+                )
+            except Exception:
+                # Fallback: if optimizer/loss not present, set typical defaults
+                model.compile(
+                    optimizer=tf.keras.optimizers.Adam(),
+                    loss=tf.keras.losses.CategoricalCrossentropy(),
+                    metrics=[
+                        tf.keras.metrics.CategoricalAccuracy(name='accuracy'),
+                        tf.keras.metrics.AUC(name='auc'),
+                        tf.keras.metrics.Precision(name='precision'),
+                        tf.keras.metrics.Recall(name='recall')
+                    ]
+                )
             
             return model
             
@@ -122,43 +154,53 @@ class Evaluation:
                 repo_name=dagshub_repo,
                 mlflow=True
             )
-            self.logger.info(f"DagHub initialized: {dagshub_owner}/{dagshub_repo}")
+            self.logger.debug(f"DagHub initialized: {dagshub_owner}/{dagshub_repo}")
             
             mlflow.set_tracking_uri(self.config.mlflow_uri)
-            self.logger.info(f"MLflow tracking URI set: {self.config.mlflow_uri}")
+            self.logger.debug(f"MLflow tracking URI set: {self.config.mlflow_uri}")
             
             tracking_url_type_store = urlparse(mlflow.get_tracking_uri()).scheme
             
             with mlflow.start_run():
-                self.logger.info("MLflow run started")
+                self.logger.debug("MLflow run started")
                 
-                self.logger.info("Logging parameters...")
-                mlflow.log_params(self.config.all_params)
+                self.logger.debug("Logging parameters...")
+                essential = {
+                    "IMAGE_SIZE": self.config.params_image_size,
+                    "BATCH_SIZE": self.config.params_batch_size,
+                    "EPOCHS": self.config.all_params.EPOCHS if hasattr(self.config.all_params, "EPOCHS") else None,
+                    "LEARNING_RATE": self.config.all_params.LEARNING_RATE if hasattr(self.config.all_params, "LEARNING_RATE") else None,
+                    "AUGMENTATION": self.config.all_params.AUGMENTATION if hasattr(self.config.all_params, "AUGMENTATION") else None,
+                }
+                # remove None entries
+                essential = {k: v for k, v in essential.items() if v is not None}
+                mlflow.log_params(essential)
                 
-                self.logger.info("Logging metrics...")
+                self.logger.debug("Logging metrics...")
                 mlflow.log_metrics(self.score)
                 
-                self.logger.info("Logging model...")
+                self.logger.debug("Logging model...")
                 
                 if tracking_url_type_store != "file":
-                    self.logger.info("Remote tracking detected - registering model...")
+                    self.logger.debug("Remote tracking - registering model...")
                     
+                    # Use the new 'name' parameter instead of deprecated 'artifact_path'
                     mlflow.keras.log_model(
                         self.model,
-                        artifact_path="model",
+                        name="model",
                         registered_model_name="EfficientNetB0_ChestCancer"
                     )
                     
-                    self.logger.info("Model registered in MLflow Model Registry")
+                    self.logger.info("Model registered in MLflow")
                 else:
-                    self.logger.info("Local tracking detected - logging model...")
+                    self.logger.debug("Local tracking - logging model...")
                     
                     mlflow.keras.log_model(
                         self.model,
-                        artifact_path="model"
+                        name="model"
                     )
                     
-                    self.logger.info("Model logged to MLflow (local)")
+                    self.logger.info("Model logged to MLflow")
                 
                 run_id = mlflow.active_run().info.run_id
                 self.logger.info(f"MLflow run completed: {run_id}")
