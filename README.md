@@ -1,4 +1,3 @@
-
 # 🫁 Chest Cancer Classification using Deep Learning
 
 <div align="center">
@@ -12,152 +11,159 @@
 
 </div>
 
-## 📋 Overview
+---
 
-An end-to-end deep learning solution for detecting **Adenocarcinoma** cancer from chest CT scan images. Built with production-grade MLOps practices, this project demonstrates complete ML pipeline implementation from data ingestion to deployment with automated CI/CD workflows.
+## 📌 Overview
+
+An **end-to-end deep learning project** for detecting **Adenocarcinoma cancer** from chest CT scan images. The project is designed with **production-grade MLOps practices**, covering everything from data ingestion and training to deployment with automated CI/CD pipelines.
+
+---
 
 ## ✨ Key Features
 
-### Machine Learning Pipeline
-- **Transfer Learning** with EfficientNetB0 for optimal performance
-- **Automated training pipeline** with modular component architecture
-- **MLflow integration** for experiment tracking and model versioning
-- **DVC (Data Version Control)** for reproducible data pipelines
+### 🧠 Machine Learning
 
-### Production-Ready Application
-- **FastAPI REST API** with clean, async endpoints
-- **Interactive web interface** with drag-and-drop image upload
-- **Model caching** for sub-second inference after initial load
-- **Health check endpoints** for monitoring
+* Transfer Learning using **EfficientNetB0**
+* Modular, reusable **training pipeline**
+* **MLflow** for experiment tracking & model versioning
+* **DVC** for reproducible data and pipeline management
 
-### MLOps & DevOps
-- **CI/CD Pipeline** with GitHub Actions
-- **Docker containerization** with optimized image size
-- **AWS ECS deployment** ready with automated workflows
-- **Environment-based configuration** for secure credential management
+### 🚀 Production Application
+
+* **FastAPI**-based REST API
+* Simple **web UI** with image upload support
+* Model **lazy loading & caching** for fast inference
+* Health-check endpoint for monitoring
+
+### ⚙️ MLOps & DevOps
+
+* **CI/CD pipelines** using GitHub Actions
+* **Dockerized** application for consistent deployment
+* **AWS ECS** ready deployment workflow
+* Environment-based configuration for secrets
+
+---
 
 ## 🛠️ Tech Stack
 
-### Core ML/DL
-- **TensorFlow/Keras** - Deep learning framework
-- **EfficientNetB0** - Pre-trained CNN model
-- **NumPy, Pandas** - Data manipulation
+### Core ML / DL
 
-### MLOps Tools
-- **MLflow** - Experiment tracking and model registry
-- **DVC** - Data and model versioning
-- **DagHub** - Remote experiment tracking
+* TensorFlow & Keras
+* EfficientNetB0
+* NumPy, Pandas
+
+### MLOps
+
+* MLflow
+* DVC
+* DagHub
 
 ### Backend & API
-- **FastAPI** - Modern web framework for building APIs
-- **Uvicorn** - ASGI server
-- **Python-multipart** - File upload handling
+
+* FastAPI
+* Uvicorn
+* Python-multipart
 
 ### Frontend
-- **TailwindCSS** - Responsive UI design
-- **Vanilla JavaScript** - Interactive web interface
+
+* HTML + TailwindCSS
+* Vanilla JavaScript
 
 ### DevOps & Cloud
-- **Docker** - Containerization
-- **GitHub Actions** - CI/CD automation
-- **AWS ECS** - Container orchestration
-- **AWS ECR** - Container registry
 
-### Development Tools
-- **Python-dotenv** - Environment variable management
-- **PyYAML** - Configuration file parsing
-- **Python-box** - Dict to object conversion
+* Docker
+* GitHub Actions
+* AWS ECS & ECR
 
----📁 Project Structure
+---
+
+## 📁 Project Structure
 
 ```
 ├── .github/
 │   └── workflows/
-│       └── main.yaml              # CI/CD pipeline configuration
+│       └── main.yaml              # CI/CD pipeline
 ├── artifacts/
-│   ├── data_ingestion/            # Downloaded and processed data
-│   ├── prepare_base_model/        # Base and updated models
-│   └── training/                  # Trained models and logs
+│   ├── data_ingestion/            # Raw & processed data
+│   ├── prepare_base_model/        # Base & updated models
+│   └── training/                  # Trained models & logs
 ├── config/
-│   └── config.yaml                # Project configuration
-├── research/
+│   └── config.yaml                # Central configuration
+├── research/                      # Jupyter notebooks
 │   ├── 01_data_ingestion.ipynb
 │   ├── 02_prepare_base_model.ipynb
 │   ├── 03_model_trainer.ipynb
-│   └── 04_model_evaluation_with_mlflow.ipynb
+│   └── 04_model_evaluation_mlflow.ipynb
 ├── src/cnnClassifier/
 │   ├── components/                # Core ML components
-│   │   ├── data_ingestion.py
-│   │   ├── prepare_base_model.py
-│   │   ├── model_trainer.py
-│   │   └── model_evaluation_mlflow.py
-│   ├── config/
-│   │   └── configuration.py       # Configuration manager
-│   ├── entity/
-│   │   └── config_entity.py       # Configuration dataclasses
-│   ├── pipeline/                  # Training and prediction pipelines
-│   │   ├── stage_01_data_ingestion.py
-│   │   ├── stage_02_prepare_base_model.py
-│   │   ├── stage_03_model_trainer.py
-│   │   ├── stage_04_model_evaluation.py
-│   │   └── prediction.py
-│   ├── utils/
-│   │   └── common.py              # Utility functions
+│   ├── pipeline/                  # Training & inference pipelines
+│   ├── config/                    # Configuration manager
+│   ├── entity/                    # Dataclasses
+│   ├── utils/                     # Utility helpers
 │   └── constants/
-│       └── __init__.py            # Project constants
 ├── templates/
-│   └── index.html                 # Web interface
-├── app.py                         # FastAPI application
-├── main.py                        # Training pipeline entry point
-├── dvc.yaml                       # DVC pipeline configuration
-├── params.yaml                    # Model hyperparameters
-├── requirements.txt               # Python dependencies
-├── Dockerfile                     # Container configuration
-├── .dockerignore                  # Docker build exclusions
+│   └── index.html                 # Web UI
+├── app.py                         # FastAPI app
+├── main.py                        # Training pipeline entry
+├── dvc.yaml                       # DVC pipeline
+├── params.yaml                    # Model parameters
+├── requirements.txt
+├── Dockerfile
+├── .dockerignore
 └── README.md
 ```
 
-<div align="center">
-**⭐ Star this repo if you find it useful**
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Python 3.10+
-- Docker (optional)
-- AWS CLI (for deployment)
+
+* Python 3.10+
+* Docker (optional)
+* AWS CLI (for cloud deployment)
 
 ### Local Setup
 
 1. **Clone the repository**
+
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/CodeBy-HP/Chest-Cancer-Classification.git
    cd Chest-Cancer-Classification
    ```
 
-2. **Create virtual environment**
+2. **Create & activate virtual environment**
+
    ```bash
    python -m venv venv
-   source venv/bin/activate 
+   source venv/bin/activate  # Linux / macOS
+   # venv\\Scripts\\activate  # Windows
    ```
 
 3. **Install dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Set up environment variables**
+4. **Configure environment variables**
+
    ```bash
    cp .env.example .env
-   # Edit .env with your credentials
+   # update credentials inside .env
    ```
 
 5. **Run the application**
+
    ```bash
    python app.py
    ```
-   Access at: `http://localhost:8000`
 
-### Docker Deployment
+   Visit: [http://localhost:8000](http://localhost:8000)
+
+---
+
+## 🐳 Docker Setup
 
 ```bash
 # Build image
@@ -167,33 +173,22 @@ docker build -t chest-cancer-classifier .
 docker run -p 8000:8000 --env-file .env chest-cancer-classifier
 ```
 
-## 📊 Model Training Pipeline
+---
+
+## 📊 Training Pipeline
 
 ```bash
-# Run complete training pipeline
+# Run full training pipeline
 python main.py
 
-# Or run individual stages with DVC
+# Or via DVC
 dvc repro
 ```
-
-## 🔗 API Endpoints
-
-- `GET /` - Web interface
-- `POST /predict` - Image classification endpoint
-- `GET /health` - Health check
-
-## 📈 Results
-
-- **Model**: EfficientNetB0 (Transfer Learning)
-- **Input Size**: 224x224x3
-- **Classes**: Adenocarcinoma Cancer, Normal
-- **Metrics**: Accuracy, Precision, Recall, AUC
 
 ---
 
 <div align="center">
 
-**⭐ Star this repo if you find it useful!**
+⭐ **Star this repository if you find it useful** ⭐
 
-Made with ❤️ by [Harsh Pratap Singh](https://github.com/CodeBy-HP)
+</div>
