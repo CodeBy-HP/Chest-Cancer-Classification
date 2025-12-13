@@ -1,17 +1,19 @@
+import logging
 from cnnClassifier.config.configuration import ConfigurationManager
 from cnnClassifier.components.prepare_base_model import PrepareBaseModel
-from cnnClassifier import logger
 
 
-
-STAGE_NAME = "Prepare base model"
+STAGE_NAME = "Prepare Base Model Stage"
 
 
 class PrepareBaseModelTrainingPipeline:
+    """Pipeline for base model preparation stage"""
+    
     def __init__(self):
         pass
 
     def main(self):
+        """Execute base model preparation pipeline"""
         config = ConfigurationManager()
         prepare_base_model_config = config.get_prepare_base_model_config()
         prepare_base_model = PrepareBaseModel(config=prepare_base_model_config)
@@ -19,14 +21,12 @@ class PrepareBaseModelTrainingPipeline:
         prepare_base_model.update_base_model()
 
 
-
 if __name__ == '__main__':
     try:
-        logger.info(f"*******************")
-        logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+        logging.info(f">>>>>> {STAGE_NAME} started <<<<<<")
         obj = PrepareBaseModelTrainingPipeline()
         obj.main()
-        logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+        logging.info(f">>>>>> {STAGE_NAME} completed <<<<<<\n")
     except Exception as e:
-        logger.exception(e)
+        logging.exception(e)
         raise e

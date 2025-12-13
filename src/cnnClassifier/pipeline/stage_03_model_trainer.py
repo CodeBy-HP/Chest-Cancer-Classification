@@ -1,18 +1,19 @@
+import logging
 from cnnClassifier.config.configuration import ConfigurationManager
 from cnnClassifier.components.model_trainer import Training
-from cnnClassifier import logger
 
 
-
-STAGE_NAME = "Training"
-
+STAGE_NAME = "Model Training Stage"
 
 
 class ModelTrainingPipeline:
+    """Pipeline for model training stage"""
+    
     def __init__(self):
         pass
 
     def main(self):
+        """Execute model training pipeline"""
         config = ConfigurationManager()
         training_config = config.get_training_config()
         training = Training(config=training_config)
@@ -21,15 +22,13 @@ class ModelTrainingPipeline:
         training.train()
 
 
-
 if __name__ == '__main__':
     try:
-        logger.info(f"*******************")
-        logger.info(f">>>>>> stage {STAGE_NAME} started <<<<<<")
+        logging.info(f">>>>>> {STAGE_NAME} started <<<<<<")
         obj = ModelTrainingPipeline()
         obj.main()
-        logger.info(f">>>>>> stage {STAGE_NAME} completed <<<<<<\n\nx==========x")
+        logging.info(f">>>>>> {STAGE_NAME} completed <<<<<<\n")
     except Exception as e:
-        logger.exception(e)
+        logging.exception(e)
         raise e
         

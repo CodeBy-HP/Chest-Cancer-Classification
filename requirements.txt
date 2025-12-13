@@ -16,12 +16,16 @@ types-PyYAML
 # ML workflow & tracking
 mlflow             
 dvc                
+dagshub
 
 # Notebook support
 notebook
 
 # File / dataset utilities
 gdown
+
+# Environment variable management
+python-dotenv
 
 # Web / API framework
 fastapi          
